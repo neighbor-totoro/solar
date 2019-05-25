@@ -1,7 +1,7 @@
 #ifndef __SO_STRINGS_H__
 #define __SO_STRINGS_H__
 
-#include    "types.h"
+#include    "typeclass/types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,6 +13,8 @@ struct String{
     int64   cap;
     char    *buf;
 };
+
+#define string_new_literal(s)      string_new(s, sizeof(s)-1)
 
 int     string_delete(String *);
 String  *string_new(const char *, int64);

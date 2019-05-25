@@ -1,5 +1,5 @@
-#include    "sugar.h"
-#include    "strings.h"
+#include    "typeclass/sugar.h"
+#include    "adt/strings/strings.h"
 #include    <stdlib.h>
 #include    <string.h>
 
