@@ -119,35 +119,34 @@ static SorString    *
 base64EncoderEncode(SorEncoder *enc)
 {
     uint32  v;
-    char    *p;
-    int64   i, j;
+    char    *p, *q;
+    int64   i, j, k;
     SorString   *dst;
     SorBase64Encoder    *e;
 
     e = data_offset2(enc, SorBase64Encoder, n);
-    if(!(dst = SorStrNew(NULL, 0)))
+    if(!(dst = SorStrNew(NULL, (SorStrLen(e->src) + 2) / 3 * 4)))
         return NULL;
+    k = 0
+    q = SorStrStr(dst);
     p = SorStrStr(e->src);
     for(i = 0, j = SorStrLen(e->src); j - i >= 3; i += 3){
         v = (uint32)p[i+0] << 16 | (uint32)p[i+1] << 8 | (uint32)p[i+2];
-        SOR_BASE64_STR_APPEND(dst, e->encode[v>>18&0x3F])
-        SOR_BASE64_STR_APPEND(dst, e->encode[v>>12&0x3F])
-        SOR_BASE64_STR_APPEND(dst, e->encode[v>>6&0x3F])
-        SOR_BASE64_STR_APPEND(dst, e->encode[v&0x3F])
+        p[k++] = e->encode[v>>18&0x3F]; p[k++] = e->encode[v>>12&0x3F];
+        p[k++] = e->encode[v>>6&0x3F]; p[k++] = e->encode[v&0x3F];
     }
     if(i == j)
         return dst;
     v = (uint32)p[i+0] << 16;
     if((j - i) == 2)
         v |= (uint32)p[i+1] << 8;
-    SOR_BASE64_STR_APPEND(dst, e->encode[v>>18&0x3F])
-    SOR_BASE64_STR_APPEND(dst, e->encode[v>>12&0x3F])
+    p[k++] = e->encode[v>>18&0x3F]; p[k++] = e->encode[v>>12&0x3F];
     BMATCH(j-i == 2)
-        SOR_BASE64_STR_APPEND(dst, e->encode[v>>6&0x3F])
+        p[k++] = e->encode[v>>6&0x3F];
     DEFAULT
-        SOR_BASE64_STR_APPEND(dst, '=')
+        p[k++] = '=';
     EMATCH
-    SOR_BASE64_STR_APPEND(dst, '=')
+    p[k++] = '=';
     return dst;
 ERR:
     if(dst)

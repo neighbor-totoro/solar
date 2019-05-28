@@ -113,7 +113,8 @@ strAppendString(SorString *xs, const char *s, int64 n)
         if(strGrow(xs) != 0)
             return -1;
     }
-    memmove(xs->buf + xs->len, s, n);
+    if(s != NULL)
+        memmove(xs->buf + xs->len, s, n);
     xs->len = xs->len + n;
     return 0;
 }

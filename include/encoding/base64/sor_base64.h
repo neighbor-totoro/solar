@@ -12,8 +12,6 @@ extern "C" {
 #define BASE64_STD  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 #define BASE64_URL  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 
-#define SOR_BASE64_STR_APPEND(xs, x)    {if(SorStrAppend((xs), (x)) == 1) goto ERR;}
-
 typedef struct SorBase64Encoder SorBase64Encoder;
 struct SorBase64Encoder{
     SorEncoder  n;
