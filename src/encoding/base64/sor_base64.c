@@ -127,26 +127,26 @@ base64EncoderEncode(SorEncoder *enc)
     e = data_offset2(enc, SorBase64Encoder, n);
     if(!(dst = SorStrNew(NULL, (SorStrLen(e->src) + 2) / 3 * 4)))
         return NULL;
-    k = 0
+    k = 0;
     q = SorStrStr(dst);
     p = SorStrStr(e->src);
     for(i = 0, j = SorStrLen(e->src); j - i >= 3; i += 3){
         v = (uint32)p[i+0] << 16 | (uint32)p[i+1] << 8 | (uint32)p[i+2];
-        p[k++] = e->encode[v>>18&0x3F]; p[k++] = e->encode[v>>12&0x3F];
-        p[k++] = e->encode[v>>6&0x3F]; p[k++] = e->encode[v&0x3F];
+        q[k++] = e->encode[v>>18&0x3F]; q[k++] = e->encode[v>>12&0x3F];
+        q[k++] = e->encode[v>>6&0x3F]; q[k++] = e->encode[v&0x3F];
     }
     if(i == j)
         return dst;
     v = (uint32)p[i+0] << 16;
     if((j - i) == 2)
         v |= (uint32)p[i+1] << 8;
-    p[k++] = e->encode[v>>18&0x3F]; p[k++] = e->encode[v>>12&0x3F];
+    q[k++] = e->encode[v>>18&0x3F]; q[k++] = e->encode[v>>12&0x3F];
     BMATCH(j-i == 2)
-        p[k++] = e->encode[v>>6&0x3F];
+        q[k++] = e->encode[v>>6&0x3F];
     DEFAULT
-        p[k++] = '=';
+        q[k++] = '=';
     EMATCH
-    p[k++] = '=';
+    q[k++] = '=';
     return dst;
 ERR:
     if(dst)
