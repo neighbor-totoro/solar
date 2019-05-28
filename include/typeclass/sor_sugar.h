@@ -1,5 +1,5 @@
-#ifndef __SO_SUGAR_H__
-#define __SO_SUGAR_H__
+#ifndef __SOR_SUGAR_H__
+#define __SOR_SUGAR_H__
 
 #ifdef __cplusplus
 extern "C" {

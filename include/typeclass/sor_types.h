@@ -1,5 +1,5 @@
-#ifndef __SO_TYPES_H__
-#define __SO_TYPES_H__
+#ifndef __SOR_TYPES_H__
+#define __SOR_TYPES_H__
 
 #include    <stdio.h>
 #include    <stdint.h>
@@ -59,7 +59,6 @@ typedef intptr_t    intptr;
 typedef uintptr_t   uintptr;
 
 typedef uint8       bool;
-typedef uint8       byte;
 
 enum{true = 1, false = 0};
 

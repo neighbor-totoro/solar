@@ -1,7 +1,8 @@
-#include "unit_test/adt/test_adt.h"
-#include <check.h>
+#include    <check.h>
+#include    "unit_test/adt/test_adt.h"
 
-int test_adt()
+int
+test_adt()
 {
     int     ret;
     SRunner *sr;

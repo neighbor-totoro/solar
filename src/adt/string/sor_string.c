@@ -1,29 +1,29 @@
-#include    "typeclass/sugar.h"
-#include    "adt/strings/strings.h"
 #include    <stdlib.h>
 #include    <string.h>
+#include    "typeclass/sor_sugar.h"
+#include    "adt/string/sor_string.h"
 
-static int  string_grow(String *xs);
-static int  string_append_string(String *xs, const char *s, int64 n);
+static int  strGrow(SorString *);
+static int  strAppendString(SorString *, const char *, int64);
 
-String  *
-string_new(const char *s, int64 n)
+SorString   *
+SorStrNew(const char *s, int64 n)
 {
-    String  *xs;
+    SorString   *xs;
 
     if(!(xs = calloc(1, sizeof(*xs))))
         return NULL;
-    if(n > 0 && string_append_string(xs, s, n) != 0)
+    if(n > 0 && strAppendString(xs, s, n) != 0)
         goto ERR;
     return xs;
 ERR:
     if(xs)
-        string_delete(xs);
+        SorStrDel(xs);
     return NULL;
 }
 
 int
-string_delete(String *xs)
+SorStrDel(SorString *xs)
 {
     if(xs->buf)
         free(xs->buf);
@@ -32,7 +32,7 @@ string_delete(String *xs)
 }
 
 int
-string_remove(String *xs, int64 idx)
+SorStrRemove(SorString *xs, int64 idx)
 {
     if(idx >= xs->len)
         return -1;
@@ -42,22 +42,22 @@ string_remove(String *xs, int64 idx)
 }
 
 int
-string_append(String *xs, char c)
+SorStrAppend(SorString *xs, char c)
 {
-    if(xs->len == xs->cap && string_grow(xs) != 0)
+    if(xs->len == xs->cap && strGrow(xs) != 0)
         return -1;
     xs->buf[xs->len++] = c;
     return 0;
 }
 
 int
-string_join(String *xs, String *ys)
+SorStrJoin(SorString *xs, SorString *ys)
 {
-    return string_append_string(xs, ys->buf, ys->len);
+    return strAppendString(xs, ys->buf, ys->len);
 }
 
-String  *
-string_dup(String *xs, int64 x, int64 y)
+SorString  *
+SorStrDup(SorString *xs, int64 x, int64 y)
 {
     if(y > xs->len)
         return NULL;
@@ -67,11 +67,11 @@ string_dup(String *xs, int64 x, int64 y)
         y = xs->len;
     if(x >= y)
         return NULL;
-    return string_new(xs->buf + x, y - x);
+    return SorStrNew(xs->buf + x, y - x);
 }
 
 int
-string_compare(String *xs, String *ys)
+SorStrCmp(SorString *xs, SorString *ys)
 {
     int     r;
 
@@ -87,7 +87,7 @@ string_compare(String *xs, String *ys)
 }
 
 static int
-string_grow(String *xs)
+strGrow(SorString *xs)
 {
     int64   cap;
     char    *buf;
@@ -107,10 +107,10 @@ string_grow(String *xs)
 }
 
 static int
-string_append_string(String *xs, const char *s, int64 n)
+strAppendString(SorString *xs, const char *s, int64 n)
 {
     while(xs->len + n >= xs->cap){
-        if(string_grow(xs) != 0)
+        if(strGrow(xs) != 0)
             return -1;
     }
     memmove(xs->buf + xs->len, s, n);
