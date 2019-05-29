@@ -17,6 +17,7 @@ struct SorString{
 #define SorStrLen(xs)       ((xs)->len)
 #define SorStrStr(xs)       ((xs)->buf)
 #define SorStrReset(xs)     ((xs)->len = 0)
+#define SorStrSetLen(xs, n) ((xs)->len = n)
 
 #define SorStrNewLiteral(xs)     SorStrNew(xs, sizeof(xs) - 1)
 

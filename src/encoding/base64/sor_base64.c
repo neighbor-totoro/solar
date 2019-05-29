@@ -5,6 +5,10 @@ static void     base64EncoderReset(SorEncoder *);
 static SorString    *base64EncoderEncode(SorEncoder *);
 static int64    base64EncoderWrite(SorEncoder *, SorString *);
 
+static void     base64DecoderReset(SorDecoder *);
+static SorString    *base64DecoderDecode(SorDecoder *);
+static int64    base64DecoderWrite(SorDecoder *, SorString *);
+
 SorEncoder  *
 SorBase64NewEncoder(void)
 {
@@ -72,24 +76,68 @@ SorBase64DelUrlEncoder(SorEncoder *enc)
 SorDecoder  *
 SorBase64NewDecoder(void)
 {
+    int     i;
+    SorBase64Decoder    *d;
+
+    if(!(d = calloc(1, sizeof(*d))))
+        return NULL;
+    if(!(d->src = SorStrNew(NULL, 0)))
+        goto ERR;
+    for(i = 0; i < sizeof(BASE64_STD); i++)
+        d->decode[BASE64_STD[i]] = (uint8)i;
+    d->n.reset = base64DecoderReset;
+    d->n.write = base64DecoderWrite;
+    d->n.decode = base64DecoderDecode;
+    return &d->n;
+ERR:
+    if(d)
+        SorBase64DelDecoder(&d->n);
     return NULL;
 }
 
 int
-SorBase64DelDecoder(SorEncoder *dec)
+SorBase64DelDecoder(SorDecoder *dec)
 {
+    SorBase64Decoder    *d;
+
+    d = data_offset2(dec, SorBase64Decoder, n);
+    if(d->src)
+        SorStrDel(d->src);
+    free(d);
     return 0;
 }
 
 SorDecoder  *
 SorBase64NewUrlDecoder(void)
 {
+    int     i;
+    SorBase64Decoder    *d;
+
+    if(!(d = calloc(1, sizeof(*d))))
+        return NULL;
+    if(!(d->src = SorStrNew(NULL, 0)))
+        goto ERR;
+    for(i = 0; i < sizeof(BASE64_STD); i++)
+        d->decode[BASE64_URL[i]] = (uint8)i;
+    d->n.reset = base64DecoderReset;
+    d->n.write = base64DecoderWrite;
+    d->n.decode = base64DecoderDecode;
+    return &d->n;
+ERR:
+    if(d)
+        SorBase64DelDecoder(&d->n);
     return NULL;
 }
 
 int
-SorBase64DelUrlDecoder(SorEncoder *dec)
+SorBase64DelUrlDecoder(SorDecoder *dec)
 {
+    SorBase64Decoder    *d;
+
+    d = data_offset2(dec, SorBase64Decoder, n);
+    if(d->src)
+        SorStrDel(d->src);
+    free(d);
     return 0;
 }
 
@@ -147,6 +195,71 @@ base64EncoderEncode(SorEncoder *enc)
         q[k++] = '=';
     EMATCH
     q[k++] = '=';
+    return dst;
+ERR:
+    if(dst)
+        SorStrDel(dst);
+    return NULL;
+}
+
+static void
+base64DecoderReset(SorDecoder *dec)
+{
+    SorBase64Decoder    *d;
+
+    d = data_offset2(dec, SorBase64Decoder, n);
+    SorStrReset(d->src);
+}
+
+static int64
+base64DecoderWrite(SorDecoder *dec, SorString *data)
+{
+    SorBase64Decoder    *d;
+
+    d = data_offset2(dec, SorBase64Decoder, n);
+    BMATCH(SorStrJoin(d->src, data) == -1)
+        return -1;
+    DEFAULT
+        return SorStrLen(data);
+    EMATCH
+}
+
+static SorString    *
+base64DecoderDecode(SorDecoder *dec)
+{
+    uint32   v;
+    int64 i, j, k;
+    char    *p, *q;
+    SorString   *dst;
+    uint8   v0, v1, v2, v3;
+    SorBase64Decoder    *d;
+
+    d = data_offset2(dec, SorBase64Decoder, n);
+    if(SorStrLen(d->src) % 4)
+        return NULL;
+    if(!(dst = SorStrNew(NULL, (SorStrLen(d->src) / 4 * 3))))
+        return NULL;
+    k = 0;
+    q = SorStrStr(dst);
+    p = SorStrStr(d->src);
+    for(i = 0, j = SorStrLen(d->src); i < j; i += 4){
+        if((v0 = d->decode[p[i+0]]) == 0xFF)
+            goto ERR;
+        if((v1 = d->decode[p[i+1]]) == 0xFF)
+            goto ERR;
+        if((v2 = d->decode[p[i+2]]) == 0xFF)
+            goto ERR;
+        if((v3 = d->decode[p[i+3]]) == 0xFF)
+            goto ERR;
+        v = v0 << 18 | v1 << 12 | v2 << 6 | v3;
+        q[k++] = v >> 16 & 0xFF;
+        q[k++] = v >> 8 & 0xFF;
+        q[k++] = v & 0xFF;
+    }
+    if(p[j-1] == '=')
+        SorStrSetLen(dst, SorStrLen(dst) - 1);
+    if(p[j-2] == '=')
+        SorStrSetLen(dst, SorStrLen(dst) - 1);
     return dst;
 ERR:
     if(dst)

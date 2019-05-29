@@ -24,7 +24,7 @@ struct SorEncoder{
 
 typedef struct SorDecoder SorDecoder;
 struct SorDecoder{
-    SOR_ENCODER
+    SOR_DECODER
 };
 
 #ifdef __cplusplus

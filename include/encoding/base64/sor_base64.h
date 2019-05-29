@@ -22,19 +22,21 @@ struct SorBase64Encoder{
 typedef struct SorBase64Decoder SorBase64Decoder;
 struct SorBase64Decoder{
     SorDecoder  n;
+    SorString   *src;
+    uint8   decode[256];
 };
 
 SorEncoder  *SorBase64NewEncoder(void);
 int     SorBase64DelEncoder(SorEncoder *);
 
 SorDecoder  *SorBase64NewDecoder(void);
-int     SorBase64DelDecoder(SorEncoder *);
+int     SorBase64DelDecoder(SorDecoder *);
 
 SorEncoder  *SorBase64NewUrlEncoder(void);
 int     SorBase64DelUrlEncoder(SorEncoder *);
 
 SorDecoder  *SorBase64NewUrlDecoder(void);
-int     SorBase64DelUrlDecoder(SorEncoder *);
+int     SorBase64DelUrlDecoder(SorDecoder *);
 
 #ifdef __cplusplus
 };
