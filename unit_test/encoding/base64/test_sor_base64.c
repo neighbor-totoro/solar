@@ -91,7 +91,7 @@ START_TEST
 (TestBase64UrlDecode)
 {
     SorDecoder *d = SorBase64NewUrlDecoder();
-    SorString *in = SorStrNewLiteral("Y2FycGUgZGllbQ==");
+    SorString *in = SorStrNewLiteral("Y2FycGUgZGllbQ");
     SorString *target = SorStrNewLiteral("carpe diem");
 
     DecodeTest(d, target, in, NULL);
