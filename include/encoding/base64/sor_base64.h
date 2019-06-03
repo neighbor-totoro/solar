@@ -14,6 +14,7 @@ extern "C" {
 
 typedef struct SorBase64Encoder SorBase64Encoder;
 struct SorBase64Encoder{
+    bool    flg; // is padding?
     SorEncoder  n;
     SorString   *src;
     const char  *encode;
@@ -21,6 +22,7 @@ struct SorBase64Encoder{
 
 typedef struct SorBase64Decoder SorBase64Decoder;
 struct SorBase64Decoder{
+    bool    flg;
     SorDecoder  n;
     SorString   *src;
     uint8   decode[256];

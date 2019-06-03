@@ -18,6 +18,7 @@ SorBase64NewEncoder(void)
         return NULL;
     if(!(e->src = SorStrNew(NULL, 0)))
         goto ERR;
+    e->flg = true;
     e->encode = BASE64_STD;
     e->n.reset = base64EncoderReset;
     e->n.write = base64EncoderWrite;
@@ -50,6 +51,7 @@ SorBase64NewUrlEncoder(void)
         return NULL;
     if(!(e->src = SorStrNew(NULL, 0)))
         goto ERR;
+    e->flg = false;
     e->encode = BASE64_URL;
     e->n.reset = base64EncoderReset;
     e->n.write = base64EncoderWrite;
@@ -85,6 +87,7 @@ SorBase64NewDecoder(void)
         goto ERR;
     for(i = 0; i < sizeof(BASE64_STD); i++)
         d->decode[BASE64_STD[i]] = (uint8)i;
+    d->flg = true;
     d->n.reset = base64DecoderReset;
     d->n.write = base64DecoderWrite;
     d->n.decode = base64DecoderDecode;
@@ -119,6 +122,7 @@ SorBase64NewUrlDecoder(void)
         goto ERR;
     for(i = 0; i < sizeof(BASE64_STD); i++)
         d->decode[BASE64_URL[i]] = (uint8)i;
+    d->flg = false;
     d->n.reset = base64DecoderReset;
     d->n.write = base64DecoderWrite;
     d->n.decode = base64DecoderDecode;
@@ -192,9 +196,12 @@ base64EncoderEncode(SorEncoder *enc)
     BMATCH(j-i == 2)
         q[k++] = e->encode[v>>6&0x3F];
     DEFAULT
-        q[k++] = '=';
+        if(e->flg)
+            q[k++] = '=';
     EMATCH
-    q[k++] = '=';
+    if(e->flg)
+        q[k++] = '=';
+    SorStrSetLen(dst, k);
     return dst;
 ERR:
     if(dst)
@@ -235,8 +242,8 @@ base64DecoderDecode(SorDecoder *dec)
     SorBase64Decoder    *d;
 
     d = data_offset2(dec, SorBase64Decoder, n);
-    if(SorStrLen(d->src) % 4)
-        return NULL;
+    for(i = SorStrLen(d->src) % 4; i < 4; i++)
+        SorStrAppend(d->src, 0);
     if(!(dst = SorStrNew(NULL, (SorStrLen(d->src) / 4 * 3))))
         return NULL;
     k = 0;
@@ -256,9 +263,9 @@ base64DecoderDecode(SorDecoder *dec)
         q[k++] = v >> 8 & 0xFF;
         q[k++] = v & 0xFF;
     }
-    if(p[j-1] == '=')
+    if(p[j-1] == '=' || p[j-1] == 0)
         SorStrSetLen(dst, SorStrLen(dst) - 1);
-    if(p[j-2] == '=')
+    if(p[j-2] == '=' || p[j-1] == 0)
         SorStrSetLen(dst, SorStrLen(dst) - 1);
     return dst;
 ERR:
