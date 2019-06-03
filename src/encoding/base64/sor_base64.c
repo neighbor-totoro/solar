@@ -242,7 +242,7 @@ base64DecoderDecode(SorDecoder *dec)
     SorBase64Decoder    *d;
 
     d = data_offset2(dec, SorBase64Decoder, n);
-    for(i = SorStrLen(d->src) % 4; i < 4; i++)
+    for(i = SorStrLen(d->src) % 4; i > 0 && i < 4; i++)
         SorStrAppend(d->src, 0);
     if(!(dst = SorStrNew(NULL, (SorStrLen(d->src) / 4 * 3))))
         return NULL;
